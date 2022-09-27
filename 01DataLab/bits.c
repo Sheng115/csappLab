@@ -229,8 +229,8 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  unsigned x_bak = x;
-  int x_opera = (x_bak >> 31);
+  unsigned x_bak = x;           //获取符号位，先将数转化为无符号数，在进行算术右移（此时其实为逻辑右移）
+  int x_opera = (x_bak >> 31);  
   unsigned y_bak = y;
   int y_opera = (y_bak >> 31);
   int ans = ~x + 1 + y;
@@ -247,7 +247,11 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4 
  */
 int logicalNeg(int x) {
-  return 2;
+  int var = (~x + 1);       //0取反加1还是本身
+  int res = (var & x);      //一个数与相反数相与得到第一个非0位
+  unsigned ans = (~res + 1);
+  ans = ans >> 31;
+  return (ans ^ 1);
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
