@@ -323,7 +323,25 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
-  return 2;
+  int sign = uf >> 31;
+  if(sign == 0)
+    sign = 1;
+  else
+    sign = -1;
+  int exp = uf >> 23;
+  exp = (exp & 0xFF);
+  float tail = (uf & 0xFF) + (((uf >> 8) & 0xFF) << 8) + (((uf >> 16) & 0x7F) << 16);
+  tail = tail * (1 >> 23);
+  if(exp == 0)
+    return 0;
+  else if(exp == 0xFF)
+    return 0x80000000;
+  else
+    if(exp -127 < 0)
+      return 0;
+    if(exp - 127 > 31)
+      return 0x80000000;
+    return sign * (1 << (exp - 127)) * (1 + tail);
 }
 /* 
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
