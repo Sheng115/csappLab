@@ -213,13 +213,16 @@ int isAsciiDigit(int x) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  int m = !x;
+  /*int m = !x;
   int k = ((m << 1) + m);
   int j = ((k << 2) + k);
   int l = ((j << 4) + j);
   int i = ((l << 8) + l);
   int p = ((i << 16) + i);
-  return  ((~p) & y) | ((p) & z);
+  return  ((~p) & y) | ((p) & z);*/
+  x = !!x;
+  x = ~x + 1;
+  return (x & y) | (~x & z);
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -229,13 +232,22 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  unsigned x_bak = x;           //获取符号位，先将数转化为无符号数，在进行算术右移（此时其实为逻辑右移）
+  /*unsigned x_bak = x;           //获取符号位，先将数转化为无符号数，在进行算术右移（此时其实为逻辑右移）
   int x_opera = (x_bak >> 31);  
   unsigned y_bak = y;
   int y_opera = (y_bak >> 31);
   int ans = ~x + 1 + y;
   unsigned res = ans;
-  return (!((x_opera ^ 1) & (y_opera ^ 0))) & (((x_opera ^ y_opera) & x_opera) | ((res >> 31) ^ 1));
+  return (!((x_opera ^ 1) & (y_opera ^ 0))) & (((x_opera ^ y_opera) & x_opera) | ((res >> 31) ^ 1));*/
+  int x_neg = ~x + 1;
+  int ans = x_neg + y;
+  int checkSign = ans >> 31 & 0x1;
+  int leftBit = 1 << 31;
+  int x_left = x & leftBit;
+  int y_left = y & leftBit;
+  int bitXor = x_left ^ y_left;
+  bitXor = bitXor >> 31 & 0x1;
+  return ((!bitXor) & (!checkSign)) | ((bitXor)&(x_left >> 31));
 }
 //4
 /* 
@@ -247,11 +259,12 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4 
  */
 int logicalNeg(int x) {
-  int var = (~x + 1);       //0取反加1还是本身
+  /*int var = (~x + 1);       //0取反加1还是本身
   int res = (var & x);      //一个数与相反数相与得到第一个非0位
   unsigned ans = (~res + 1);
   ans = ans >> 31;
-  return (ans ^ 1);
+  return (ans ^ 1);*/
+  return ((x | (~x + 1)) >> 31) + 1;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
