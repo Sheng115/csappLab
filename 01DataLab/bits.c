@@ -310,6 +310,7 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
+  /*
   int sign = uf >> 31;
   int exp = uf >> 23;
   exp = (exp & 0xFF);
@@ -319,9 +320,21 @@ unsigned floatScale2(unsigned uf) {
   else if(exp == 0xFF)
     return uf;
   else
-    return ((exp + 1) << 23) + tail + (sign << 31);
+    return ((exp + 1) << 23) + tail + (sign << 31); //未考虑*2后，指数位变为255的情况
+  */
     //(tail * 2) + (sign << 31) + 
   //return ((exp ^ 0xFF) + 1) * uf;
+
+  int exp = (uf & 0x7f800000) >> 23;
+  int sign = uf & (1 << 31);
+  if(exp == 0)
+    return uf << 1 | sign;
+  if(exp == 255)
+    return uf;
+  exp++;
+  if(exp == 255)
+    return 0x7f800000 | sign;
+  return (exp << 23) | (uf & 0x807fffff);
 }
 /* 
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
@@ -341,8 +354,8 @@ int floatFloat2Int(unsigned uf) {
     sign = 1;
   else
     sign = -1;
-  int exp = uf >> 23;
-  exp = (exp & 0xFF);
+  int exp = (uf & 0x7f800000) >> 23;
+  //exp = (exp & 0xFF);
   float tail = (uf & 0xFF) + (((uf >> 8) & 0xFF) << 8) + (((uf >> 16) & 0x7F) << 16);
   tail = tail * (1 >> 23);
   if(exp == 0)
