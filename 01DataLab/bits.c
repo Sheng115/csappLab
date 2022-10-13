@@ -349,6 +349,7 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
+  /*
   int sign = uf >> 31;
   if(sign == 0)
     sign = 1;
@@ -367,7 +368,20 @@ int floatFloat2Int(unsigned uf) {
       return 0;
     if(exp - 127 > 31)
       return 0x80000000;
-    return sign * (1 << (exp - 127)) * (1 + tail);
+    return sign * (1 << (exp - 127)) * (1 + tail);  //未考虑正整数移动31位溢出情况
+  */
+  int sign_ = uf >> 31;
+  int exp_ = ((uf & 0x7f800000) >> 23) - 127;
+  int frac_ = (uf & 0x007fffff) | 0x800000;
+  if(exp_ > 31) return 0x80000000;
+  if(exp_ < 0) return 0;
+
+  if(exp_ > 23) frac_ <<= (exp_ - 23);
+  else frac_ >>= (23 - exp_);
+
+  if(!(frac_ >> 31) ^ sign_) return frac_;
+  else if(frac_ >> 31) return 0x80000000;
+  else return ~frac_ + 1;
 }
 /* 
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
@@ -383,6 +397,7 @@ int floatFloat2Int(unsigned uf) {
  *   Rating: 4
  */
 unsigned floatPower2(int x) {
+  /*
   if(x < -149)
     return 0;
   else if(x <= 0)
@@ -391,4 +406,13 @@ unsigned floatPower2(int x) {
     return 0x7F800000;
   else
     return (x + 127) << 23;
+    */
+  if(x < -149)
+    return 0;
+  if(-149 <= x && x < -126)
+    return 0x1 << (x + 149);
+  if(-126 <= x && x <= 128)
+    return (x + 127) << 23;
+  else
+    return 0x7F800000;
 }
